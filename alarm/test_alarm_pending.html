@@ -1,0 +1,85 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Test Non-Permitted Application for Alarm API</title>
+  <script type="application/javascript" src="/tests/SimpleTest/SimpleTest.js"></script>
+  <script type="application/javascript" src="alarm_helper.js"/>
+  <link rel="stylesheet" type="text/css" href="/tests/SimpleTest/test.css"/>
+</head>
+<body>
+<p id="display"></p>
+<div id="content" style="display: none"></div>
+<pre id="test">
+<script type="application/javascript">
+
+"use strict";
+
+SimpleTest.waitForExplicitFinish();
+steps = [setUp, create_alarm, verify_pending, alarm_handler, verify_alarm_removed, verify_not_pending, tearDown];
+var alarmId = [];
+
+runAll(steps);
+
+function setUp(next) {
+  SpecialPowers.pushPrefEnv({"set": [["dom.mozAlarms.enabled", true]]}, function() {
+    SpecialPowers.removePermission("alarms", document);
+    next();
+  };
+}
+
+function create_alarm(next) {
+   var alarmTime = new Date();
+   alarm.setTime(alarmTime.getTime()+1000);
+   var request = navigator.mozAlarms.add(alarm, "ignoreTimezone", { mydata: "bar" });
+   request.onsuccess = function (e) {
+     alarms.push(e.target.result);
+     next();
+   };
+   request.onerror = function (e) {
+     alert(e.target.error.name);
+     next();
+   };
+
+}
+
+function verify_pending(next) {
+  var alarm_pending = navigator.mozHasPendingMessage("alarm");
+  if (alarm_pending == true) {
+    ok(true, "There is an alarm pending");
+  }
+  ok(false, "There is not an alarm pending");
+}
+
+function alarm_handler(next) {
+   var alarmed = false;
+   navigator.mozSetMessageHandler("alarm", 
+      function (message) { 
+        alert("alarm fired: " + JSON.stringify(message)); 
+        alarmed = true;
+        next();
+      }
+   );
+   setTimeout(function(){ 
+     if (alarmed == false) {
+       ok(alarmed, "alarm did not fire");
+       next();
+     }
+   },2000);
+}
+
+function verify_alarm_removed(next) {
+  var request = navigator.mozAlarms.getAll();
+  request.onsuccess = function (e) { 
+    ok(false, "Alarm has not been removed " + JSON.stringify(e.target.result));
+    next();
+  };
+  request.onerror = function (e) { 
+    ok(true, "Alarm has been removed");
+    next();
+  };
+}
+
+</script>
+</pre>
+</body>
+</html>

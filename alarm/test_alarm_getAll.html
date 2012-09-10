@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Test Non-Permitted Application for Alarm API</title>
+  <script type="application/javascript" src="/tests/SimpleTest/SimpleTest.js"></script>
+  <script type="application/javascript" src="alarm_helper.js"/>
+  <link rel="stylesheet" type="text/css" href="/tests/SimpleTest/test.css"/>
+</head>
+<body>
+<p id="display"></p>
+<div id="content" style="display: none"></div>
+<pre id="test">
+<script type="application/javascript">
+
+"use strict";
+
+SimpleTest.waitForExplicitFinish();
+steps = [setUp, create_alarm, verify_alarm, tearDown];
+var alarmId = [];
+
+runAll(steps);
+
+function setUp(next) {
+  SpecialPowers.pushPrefEnv({"set": [["dom.mozAlarms.enabled", true]]}, function() {
+    SpecialPowers.removePermission("alarms", document);
+    next();
+  };
+}
+
+function create_alarm(next) {
+   var alarmTime = new Date();
+   alarm.setTime(alarmTime.getTime()+300000);
+   var request = navigator.mozAlarms.add(alarm, "ignoreTimezone", { mydata: "bar" });
+   request.onsuccess = function (e) {
+     alarmId.push(e.target.result);
+     next();
+   };
+   request.onerror = function (e) {
+     alert(e.target.error.name);
+     next();
+   };
+
+}
+
+function verify_alarm(next) {
+  var request = navigator.mozAlarms.getAll();
+  request.onsuccess = function (e) { 
+    console.log(JSON.stringify(e.target.result));
+    next();
+  };
+  request.onerror = function (e) { 
+    console.log(e.target.error.name); 
+    next();
+  };
+}
+
+</script>
+</pre>
+</body>
+</html>
