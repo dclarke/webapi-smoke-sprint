@@ -14,23 +14,13 @@
 
 "use strict";
 
+steps = [setUp, api_available, tearDown];
 SimpleTest.waitForExplicitFinish();
-steps = [setUp, take_multiple_picture, tearDown];
-
 runAll(steps);
 
-
-function take_multiple_picture(next) {
-  
-}
-
-function take_picture(format, width, height) {
-  this._cameraObj
-
-}
-
-function vefiy_picture(blob, format, width, height) {
-
+function api_available(next) {
+  ok(navigator.mozCameras, "mozCamera api is present");
+  next();
 }
 
 </script>
