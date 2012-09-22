@@ -1,32 +1,47 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+  <meta charset="utf-8">
   <title>Test for Power API</title>
-  <script type="application/javascript" src="/tests/SimpleTest/SimpleTest.js"></script>
-  <link rel="stylesheet" type="text/css" href="/tests/SimpleTest/test.css"/>
 </head>
 <body>
-<p id="display"></p>
-<div id="content" style="display: none">
-</div>
-<pre id="test">
+<script type="application/javascript" src="/tests/SimpleTest/SimpleTest.js"></script>
+
 <script type="application/javascript">
 
-/** Test for Power API **/
+function postMsg(msg)
+{
+  parent.postMessage(msg, "http://mochi.test:8888");
+}
 
-ok('mozPower' in navigator, "navigator.mozPower should exist");
+
+var result = {
+  "result": 'mozPower' in navigator, 
+  "msg": "navigator.mozPower Should exist"};
+
+
+postMsg(result);
 
 /** Test permission **/
 
-SpecialPowers.removePermission("power", document);
-
-power = navigator.mozPower;
-ok(!power, "Shouldn't be able to access power manager without permission.");
+SpecialPowers.addPermission("power", false, document);
 
 SpecialPowers.addPermission("power", true, document);
 
-power = navigator.mozPower;
-ok(power, "Shouldn be able to access power manager with permission.");
+var power = navigator.mozPower;
+
+dump(navigator.mozPower);
+
+var result = {
+"result": power, 
+"msg": "navigator.mozPower is enabled in browser"};
+
+postMsg(result);
+
+
+//parent.ok(!power, "Should be able to access power manager with permission.");
+
+parent.postMessage("finished", "*");
 
 </script>
 </pre>
