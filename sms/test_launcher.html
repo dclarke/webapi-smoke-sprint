@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Test Launcher for Settings API</title>
+  <script type="application/javascript" src="/MochiKit/MochiKit.js"></script>
+  <script type="application/javascript" src="/tests/SimpleTest/SimpleTest.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/tests/SimpleTest/test.css"/>
+</head>
+<body/>
+
+  <script type="application/javascript" >
+
+  SimpleTest.waitForExplicitFinish();
+
+  function createIframe(file) {
+    var iframe = document.createElement("iframe");
+    iframe.mozApp = "http://example.org/manifest.webapp";
+    iframe.src = "http://example.org/tests/dom/sms/tests/" + file + ".html";
+    iframe.setAttribute("id", file);
+    iframe.onload = loaded();
+    document.body.appendChild(iframe);
+  }
+
+  function enable(value) {
+    SpecialPowers.setBoolPref("dom.sms.enabled", true);
+    SpecialPowers.addPermission("sms", value, "http://example.org/tests/dom/sms/tests/sms_on_basics.html");
+  }
+
+  var files = ["sms_on_basics", "sms_off_basics"];
+  var finished = 0;
+
+  enable(true);
+
+  window.setTimeout(function() {
+                 createIframe(files[0]);
+                 ok(true, "just created iframe");
+                 }, 2000);
+
+  function loaded() {
+
+    window.addEventListener("message", function onMessage(event) {
+       if (event.data == "finished") {
+         window.removeEventListener("message", onMessage, false);
+         finished++;
+         //if (finished == 1) {
+           enable(true);
+           createIframe(files[0]);
+        // } else  {
+        //   SimpleTest.finish();
+        // }
+       } else {
+         if(event.data.type == "ok") {  
+           ok(event.data.result, event.data.msg);
+         }
+         else if (event.data.type == "is") {
+           is(event.data.result[0], event.data.result[1], event.data.msg);
+         }
+       }
+           
+     }, false);
+
+  }
+
+  </script>
+</head>
+
+</html>

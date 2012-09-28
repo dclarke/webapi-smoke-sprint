@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Test for WebSMS</title>
+</head>
+<body>
+<p id="display"></p>
+<div id="content" style="display: none">
+<iframe></iframe>
+</div>
+<pre id="test">
+<script type="application/javascript">
+
+SpecialPowers.addPermission("sms", true, document);
+function postMsg(msg)
+{
+  parent.postMessage(msg, "http://mochi.test:8888");
+}
+
+function ok(value, msg) {
+  var result = {
+   "type": "ok",
+   "result": value ? true : false, 
+   "msg": msg  
+  };
+  postMsg(result);
+}
+
+function is(value1, value2, msg) {
+  var result = {
+   "type": "is",
+   "result": [value1, value2],
+   "msg": msg 
+  };
+  postMsg(result);
+
+}
+
+/** Test for WebSMS **/
+
+function checkSmsDisabled() {
+  ok('mozSms' in navigator, "navigator.mozSms should exist");
+  is(navigator.mozSms, null, "navigator.mozSms should return null");
+}
+
+function checkSmsEnabled() {
+  // Bug 784617: WebSms is disabled on all platforms except Android for the moment.
+  ok(true, "HERE");
+  postMsg("finished");
+
+  if (navigator.appVersion.indexOf("Android") == -1) {
+    checkSmsDisabled();
+    return;
+  }
+  ok(true, "SECOND");
+  ok('mozSms' in navigator, "navigator.mozSms should exist");
+  ok(navigator.mozSms, "navigator.mozSms returns an object");
+  ok(navigator.mozSms instanceof MozSmsManager, "navigator.mozSms is an SmsManager object");
+}
+
+function checkInterface(aInterface) {
+  ok(!(aInterface in window), aInterface + " should be prefixed");
+  ok(("Moz" + aInterface) in window, aInterface + " should be prefixed");
+}
+
+function test() {
+
+/*  checkInterface("SmsManager");
+  checkInterface("NavigatorSms");
+  checkInterface("SmsMessage");
+  checkInterface("SmsEvent");
+  checkInterface("SmsRequest");
+  checkInterface("SmsFilter");
+  checkInterface("SmsCursor");
+*/
+  checkSmsEnabled();
+}
+
+window.onload = test;
+
+</script>
+</pre>
+</body>
+</html>
