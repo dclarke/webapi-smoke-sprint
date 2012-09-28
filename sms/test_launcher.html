@@ -17,14 +17,19 @@
     var iframe = document.createElement("iframe");
     iframe.mozApp = "http://example.org/manifest.webapp";
     iframe.src = "http://example.org/tests/dom/sms/tests/" + file + ".html";
-    iframe.setAttribute("id", file);
+    iframe.id = file;
+    iframe.mozbrowser = true;
     iframe.onload = loaded();
     document.body.appendChild(iframe);
   }
 
   function enable(value) {
     SpecialPowers.setBoolPref("dom.sms.enabled", true);
-    SpecialPowers.addPermission("sms", value, "http://example.org/tests/dom/sms/tests/sms_on_basics.html");
+    SpecialPowers.setBoolPref("dom.mozBrowserFramesEnabled", true);
+    SpecialPowers.setBoolPref("dom.ipc.browser_frames.oop_by_default", true);
+    SpecialPowers.addPermission("sms", value, "http://example.org/");
+    SpecialPowers.addPermission("browser", value, "http://example.org/");
+    SpecialPowers.addPermission("browser", value, document);
   }
 
   var files = ["sms_on_basics", "sms_off_basics"];
